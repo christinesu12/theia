@@ -20,10 +20,9 @@ const disableJSDOM = enableJSDOM();
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Container } from 'inversify';
-import { Signal } from '@phosphor/signaling';
 import { Event } from '@theia/core/lib/common/event';
 import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
-import { DefaultUriLabelProviderContribution } from '@theia/core/lib/browser/label-provider';
+import { DefaultUriLabelProviderContribution, LabelProvider } from '@theia/core/lib/browser/label-provider';
 import { WorkspaceUriLabelProviderContribution } from './workspace-uri-contribution';
 import URI from '@theia/core/lib/common/uri';
 import { WorkspaceVariableContribution } from './workspace-variable-contribution';
@@ -45,7 +44,7 @@ beforeEach(() => {
 
     container = new Container();
     container.bind(ApplicationShell).toConstantValue({
-        currentChanged: new Signal({}),
+        onDidChangeCurrentWidget: () => undefined,
         widgets: () => []
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
@@ -55,6 +54,7 @@ beforeEach(() => {
     } as any);
     const workspaceService = new WorkspaceService();
     workspaceService.tryGetRoots = () => roots;
+    container.bind(LabelProvider).to(LabelProvider).inSingletonScope();
     container.bind(WorkspaceService).toConstantValue(workspaceService);
     container.bind(WorkspaceVariableContribution).toSelf().inSingletonScope();
     container.bind(WorkspaceUriLabelProviderContribution).toSelf().inSingletonScope();
